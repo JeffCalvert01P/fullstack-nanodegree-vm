@@ -122,18 +122,61 @@ def testPairings():
     if correct_pairs != actual_pairs:
         raise ValueError(
             "After one match, players with one win should be paired.")
-    print "8. After one match, players with one win are paired."
+    print "9. After one match, players with one win are paired."
+
+
+def runSwissSystem():
+    tournament = 1
+    ## comment the following to lines to run with multiple tournaments
+    deleteMatches()
+    deletePlayers()
+    registerPlayer(tournament, "Twilight Sparkle")
+    registerPlayer(tournament, "Fluttershy")
+    registerPlayer(tournament, "Applejack")
+    registerPlayer(tournament, "Pinkie Pie")
+    registerPlayer(tournament, "Applejack   xxxxx")
+    registerPlayer(tournament, "Pinkie Pie   zzzzz")
+    registerPlayer(tournament, "Applejack   xxxxx")
+    registerPlayer(tournament, "Pinkie Pie   zzzzz 2")
+    registerPlayer(tournament, "Pinkie Pie   zzzzz 3")
+
+    c = countPlayers(tournament)
+    print("The following number of players are register:", c)
+    
+    ## Mr. Model formula http://senseis.xmp.net/?SwissPairing - Number of players + (7 * places) /5.
+
+    r = ((countPlayers(tournament)+ (7 * 1)) /5)
+
+    print("There will the following number of rounds: ", r)
+    tie_ind = "N"
+
+    ## Loop through for each round
+    for i in range (0, r):
+        pairings = swissPairings(tournament, i)
+        tie_ind = "Y"
+
+    ## Loop through the pairing Tuples     
+        for row in pairings:
+            id1 = row[0]
+            id2 = row[2]
+            reportMatch(tournament, id1, id2, i, tie_ind)
+            tie_ind = "N"
+            standings = playerStandings(tournament)
+            print "standings: ", standings;
+
+    
+    print "9. Swiss pairings complete."
 
 
 if __name__ == '__main__':
-    testDeleteMatches()
-    testDelete()
-    testCount()
-    testRegister()
-    testRegisterCountDelete()
-    testStandingsBeforeMatches()
-    testReportMatches()
-    testPairings()
-    print "Success!  All tests pass!"
-
+  ##  testDeleteMatches()
+  ##  testDelete()
+  ##  testCount()
+  ##  testRegister()
+  ##  testRegisterCountDelete()
+  ##  testStandingsBeforeMatches()
+  ##  testReportMatches()
+  ##  testPairings()
+  ##  print "Success!  All tests pass!"
+    runSwissSystem()
 
