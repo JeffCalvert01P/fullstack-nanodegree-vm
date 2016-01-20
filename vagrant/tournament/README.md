@@ -22,10 +22,11 @@ Extra credit project
 	- tournament_ec.sql
 
 2) Establish the database for the project you will run.
-- Navigate to the fullstack-nanodegree-vm directory
+- Navigate to the fullstack-nanodegree-vm/vagrant directory
+- start the virtual server by typing "vagrant up"
 - "vagrant ssh" to the server
-- navigate to the tournament directory
 - navigate to the vagrant director cd /vagrant
+- navigate to the tournament directory
 - access the database server by entering psql 
 - create the database by typing CREATE DATABASE tournament;
 - set-up the database tables and views by loading the appropriate file \i tournament.sql or tournament_ec.sql

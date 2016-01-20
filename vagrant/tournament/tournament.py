@@ -108,15 +108,15 @@ def reportMatch(winner, loser):
     ## add to the wins and matches for the winner    
     connection = connect()
     cursor = connection.cursor()
-    query = "UPDATE player_table set wins = wins + %s, matches = matches + %s, last_result = %s where unique_player_id = %s;"
-    data = (1, 1, "W", winner)
+    query = "UPDATE player_table set wins = wins + %s, matches = matches + %s where unique_player_id = %s;"
+    data = (1, 1, winner)
     cursor.execute(query, data)
     connection.commit()
 
  
     ## add to the matches for the loser
-    query = "UPDATE player_table set wins = wins + %s,matches = matches + %s, last_result = %s where unique_player_id = %s;"
-    data = (0, 1, "L", loser)
+    query = "UPDATE player_table set wins = wins + %s,matches = matches + %s where unique_player_id = %s;"
+    data = (0, 1, loser)
     cursor.execute(query, data)
     connection.commit()
     connection.close

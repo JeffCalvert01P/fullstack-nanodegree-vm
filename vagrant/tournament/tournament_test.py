@@ -2,7 +2,7 @@
 #
 # Test cases for tournament.py
 
-from tournament_ec import *
+from tournament import *
 
 def testDeleteMatches():
     deleteMatches()
@@ -172,7 +172,7 @@ def runSwissSystem():
 
 
 if __name__ == '__main__':
-    """
+
     testDeleteMatches()
     testDelete()
     testCount()
@@ -182,6 +182,4 @@ if __name__ == '__main__':
     testReportMatches()
     testPairings()
     print "Success!  All tests pass!"
-    """
-    runSwissSystem()
 
