@@ -2,7 +2,7 @@
 #
 # Test cases for tournament.py
 
-from tournament import *
+from tournament_ec import *
 
 def testDeleteMatches():
     deleteMatches()
@@ -88,6 +88,7 @@ def testReportMatches():
     registerPlayer("Diane Grant")
     standings = playerStandings()
     [id1, id2, id3, id4] = [row[0] for row in standings]
+
     reportMatch(id1, id2)
     reportMatch(id3, id4)
     standings = playerStandings()
@@ -145,9 +146,11 @@ def runSwissSystem():
     
     ## Mr. Model formula http://senseis.xmp.net/?SwissPairing - Number of players + (7 * places) /5.
 
-    r = ((countPlayers(tournament)+ (7 * 1)) /5)
+    r = ((c+ (7 * 1)) /5)
 
     print("There will the following number of rounds: ", r)
+
+    ## tie_ind is used to introduce tie matches occassionally
     tie_ind = "N"
 
     ## Loop through for each round
@@ -169,14 +172,16 @@ def runSwissSystem():
 
 
 if __name__ == '__main__':
-  ##  testDeleteMatches()
-  ##  testDelete()
-  ##  testCount()
-  ##  testRegister()
-  ##  testRegisterCountDelete()
-  ##  testStandingsBeforeMatches()
-  ##  testReportMatches()
-  ##  testPairings()
-  ##  print "Success!  All tests pass!"
+    """
+    testDeleteMatches()
+    testDelete()
+    testCount()
+    testRegister()
+    testRegisterCountDelete()
+    testStandingsBeforeMatches()
+    testReportMatches()
+    testPairings()
+    print "Success!  All tests pass!"
+    """
     runSwissSystem()
 
