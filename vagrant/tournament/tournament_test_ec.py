@@ -28,9 +28,12 @@ def runSwissSystem():
     
     ## Mr. Model formula http://senseis.xmp.net/?SwissPairing - Number of players + (7 * places) /5.
 
-    r = ((c+ (7 * 1)) /5)
+    r = ((c + (7 * 1)) /5)
 
     print("There will the following number of rounds: ", r)
+
+    # Do initial pairings
+    # pairings = swissPairings(tournament)
 
     ## tie_ind is used to introduce tie matches occassionally
     tie_ind = "N"
@@ -40,7 +43,8 @@ def runSwissSystem():
         pairings = swissPairings(tournament, i)
         tie_ind = "Y"
 
-    ## Loop through the pairing Tuples     
+    ## Loop through the pairing Tuples
+        print "round num ", i
         for row in pairings:
             reportMatch(tournament, row[0], row[2], i, tie_ind)
             tie_ind = "N"

@@ -1,12 +1,14 @@
 #!/usr/bin/env python
-# 
+#
 # tournament.py -- implementation of a Swiss-system tournament
 #
 
 import psycopg2
+import tournament_dbsql
 
 
 def connect():
+
     """Connect to the PostgreSQL database.  Returns a database connection."""
     return psycopg2.connect("dbname=tournament")
 
@@ -16,9 +18,10 @@ def deleteMatches():
 
     connection = connect()
     cursor = connection.cursor()
-    cursor.execute("delete from matches_table")
+    cursor.execute(tournament_dbsql.deleteMatchesSQL())
     connection.commit()
     connection.close
+
 
 def deletePlayers():
     """Remove all the player records from the database.
@@ -29,7 +32,7 @@ def deletePlayers():
 
     connection = connect()
     cursor = connection.cursor()
-    cursor.execute("delete from player_table")
+    cursor.execute(tournament_dbsql.deletePlayersSQL())
     connection.commit()
     connection.close
 
@@ -43,11 +46,11 @@ def countPlayers():
 
     connection = connect()
     cursor = connection.cursor()
-    query = "SELECT * FROM player_table"
-    cursor.execute(query)
+    cursor.execute(tournament_dbsql.selectAllPlayersSQL())
     rows = cursor.rowcount
     connection.close
     return rows
+
 
 def registerPlayer(name):
     """Adds a player to the tournament database.
@@ -60,23 +63,20 @@ def registerPlayer(name):
     """
     connection = connect()
     cursor = connection.cursor()
-    query = "INSERT INTO player_table (player_name, wins, matches) values(%s, %s, %s)"
-    data = (name, 0, 0)
-    cursor.execute(query, data)
+    data = (name, )
+    cursor.execute(tournament_dbsql.registerPlayerSQL(), data)
     connection.commit()
     connection.close
 
- 
 
 def playerStandings():
 
     """Reurns a list of the players in order of their standings
 
-
     Returns a list of the players and their win records, sorted by wins.
 
-    The first entry in the list should be the player in first place, or a player
-    tied for first place if there is currently a tie.
+    The first entry in the list should be the player in first place,
+    or a player tied for first place if there is currently a tie.
 
     Returns:
       A list of tuples, each of which contains (id, name, wins, matches):
@@ -88,13 +88,12 @@ def playerStandings():
     connection = connect()
     cursor = connection.cursor()
     
-    query = "select unique_player_id, player_name, wins, matches from player_table order by wins desc;"
-    cursor.execute(query)
+    cursor.execute(tournament_dbsql.playerStandingsSQL())
     
     rows = cursor.fetchall()
     connection.close
 
-    return rows;    
+    return rows
 
 
 def reportMatch(winner, loser):
@@ -105,21 +104,14 @@ def reportMatch(winner, loser):
       loser:  the id number of the player who lost
     """
 
-    ## add to the wins and matches for the winner    
+    # add to the wins and matches for the winner
     connection = connect()
     cursor = connection.cursor()
-    query = "UPDATE player_table set wins = wins + %s, matches = matches + %s where unique_player_id = %s;"
-    data = (1, 1, winner)
-    cursor.execute(query, data)
-    connection.commit()
-
- 
-    ## add to the matches for the loser
-    query = "UPDATE player_table set wins = wins + %s,matches = matches + %s where unique_player_id = %s;"
-    data = (0, 1, loser)
-    cursor.execute(query, data)
+    data = (winner, loser)
+    cursor.execute(tournament_dbsql.reportMatchInsertSQL(), data)
     connection.commit()
     connection.close
+
  
 def swissPairings():
     """Returns a list of pairs of players for the next round of a match.
@@ -140,22 +132,22 @@ def swissPairings():
     connection = connect()
     cursor = connection.cursor()
 
-    ## Return players in order of most winners so the winners get matched with the winners and the losers get matched with the losers.
-    query = "SELECT unique_player_id, player_name FROM player_table order by wins desc;"
+    """
+    Return players in order of most winners so the winners get matched with
+    the winners and the losers get matched with the losers.
+
+    query = "select unique_player_id, player_name from matches_count_view"
+    """
     
-    cursor.execute(query)
+    cursor.execute(tournament_dbsql.returnPlayerOrderSQL())
 
     count = 0
     pairing = ()
     pairing_list = []
 
-    match_connection = connect()
-  
-
     for row in cursor:
 
         count += 1
-
 
         if count < 2:
             player1 = row
@@ -163,16 +155,8 @@ def swissPairings():
             pairing = player1 + row
             pairing_list.append(pairing)
             pairing = ()
-            match_cursor = match_connection.cursor()
-            query = "INSERT INTO matches_table (player1_id, player2_id) values(%s, %s)"
-            data = (player1[0], row[0])
-            match_cursor.execute(query, data)
-            match_connection.commit()
-            count = 0            
+            count = 0
             
-    match_connection.close
     connection.close
 
-    return pairing_list;    
-
-
+    return pairing_list

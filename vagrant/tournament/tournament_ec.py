@@ -1,9 +1,10 @@
 #!/usr/bin/env python
-# 
+#
 # tournament.py -- implementation of a Swiss-system tournament
 #
 
 import psycopg2
+import tournament_dbsql_ec
 
 
 def connect():
@@ -16,18 +17,18 @@ def deleteMatches():
 
     connection = connect()
     cursor = connection.cursor()
-    cursor.execute("delete from matches_table")
+    cursor.execute(tournament_dbsql_ec.deleteMatchesSQL())
     connection.commit()
     connection.close
 
+
 def deletePlayers():
     """Remove all the player records from the database.
-
     """
 
     connection = connect()
     cursor = connection.cursor()
-    cursor.execute("delete from player_table")
+    cursor.execute(tournament_dbsql_ec.deletePlayersSQL())
     connection.commit()
     connection.close
 
@@ -41,12 +42,12 @@ def countPlayers(tournament):
 
     connection = connect()
     cursor = connection.cursor()
-    query = "SELECT * FROM player_table where tournament = %s"
     data = (tournament,)
-    cursor.execute(query, data)
+    cursor.execute(tournament_dbsql_ec.selectAllPlayersSQL(), data)
     row_count = cursor.rowcount
     connection.close
     return row_count
+
 
 def registerPlayer(tournament, name):
     """Adds a player to the tournament database.
@@ -59,13 +60,11 @@ def registerPlayer(tournament, name):
     """
     connection = connect()
     cursor = connection.cursor()
-    query = "INSERT INTO player_table (tournament, player_name, wins, matches) values(%s, %s, %s, %s)"
-    data = (tournament, name, 0, 0)
-    cursor.execute(query, data)
+    data = (tournament, name)
+    cursor.execute(tournament_dbsql_ec.registerPlayerSQL(), data)
     connection.commit()
     connection.close
 
- 
 
 def playerStandings(tournament):
 
@@ -76,8 +75,8 @@ def playerStandings(tournament):
 
     Returns a list of the players and their win records, sorted by wins.
 
-    The first entry in the list should be the player in first place, or a player
-    tied for first place if there is currently a tie.
+    The first entry in the list should be the player in first place,
+    or a player tied for first place if there is currently a tie.
 
     Returns:
       A list of tuples, each of which contains (id, name, wins, matches):
@@ -89,18 +88,14 @@ def playerStandings(tournament):
     connection = connect()
     cursor = connection.cursor()
 
-    """
-        Do a left join with the player_table and matches view to get the wins from the player table and the competitors wins from the matches count view.  Left join is required because matches view will not have a row
-        for a player that never lost.  Order desc on wins and counts so I can get the player with the most wins.  If there is a tie, then the count will give me the player with the competitors with the most wins
-    """
-    
-    query = "select a.unique_player_id, player_name, wins, matches from player_table a left join matches_count_view b on a.unique_player_id = b.unique_player_id and tournament = %s order by wins desc, count desc;"
-    cursor.execute(query,(tournament,))
+    #    Query player standings
+    cursor.execute(tournament_dbsql_ec.playerStandingsSQL(), (tournament,))
     
     rows = cursor.fetchall()
+
     connection.close
 
-    return rows;    
+    return rows
 
 
 def reportMatch(tournament, winner, loser, round_num, tie_ind):
@@ -113,29 +108,11 @@ def reportMatch(tournament, winner, loser, round_num, tie_ind):
       round_num: the current round of matches
       tie_ind: indicates whether the match was a tie
     """
-    
 
-    ## Update the matches, wins and result for the winner.  
-    connection = connect()
-    cursor = connection.cursor()
-    query = "UPDATE player_table set wins = wins + %s, matches = matches + %s, last_result = %s where unique_player_id = %s and tournament = %s;"
-    data = (1, 1, "W", winner, tournament)
-    cursor.execute(query, data)
-    connection.commit()
-
-    ## Makes sure both teams receive credit for a win if there is a tie
-    if tie_ind == "Y":
-        winner_value = 1
-    else:
-        winner_value = 0
- 
-    ## Update the matches, wins and result for the loser or tie.  
-    query = "UPDATE player_table set wins = wins + %s,matches = matches + %s, last_result = %s where unique_player_id = %s and tournament = %s;"
-    data = (winner_value, 1, "L", loser, tournament)
-    cursor.execute(query, data)
-    connection.commit()
-
-    ## I always put the lesser player id in the player 1 id to limit the number of rows and keep the data cleaner
+    """
+    I always put the lesser player id in the player 1 id to limit the
+    number of rows and keep the data cleaner
+    """
     if winner > loser:
         player1 = loser
         player2 = winner
@@ -143,18 +120,21 @@ def reportMatch(tournament, winner, loser, round_num, tie_ind):
         player2 = loser
         player1 = winner
 
-    ## Update the matches table with the results 
+    # Update the matches table with 
+    print "report match ", winner, loser, round_num, tie_ind
     connection = connect()
     cursor = connection.cursor()
-    query = "UPDATE matches_table set round_num = %s, winner_id = %s, tie_ind = %s where tournament = %s and player1_id = %s and player2_id = %s;"
-    data = (round_num, winner, tie_ind, tournament, player1, player2)
-    cursor.execute(query, data)
+    data = (tournament, player1, player2, round_num, tie_ind)
+    cursor.execute(tournament_dbsql_ec.reportMatchInsertSQL(), data)
 
-    ## Insert a record in the matches table when there is a tie to give the second player credit 
+    """
+    Insert a record in the matches table when there is a tie
+    to give the second player credit
+    """
+    
     if tie_ind == "Y":
-        query = "INSERT INTO matches_table (tournament,player1_id, player2_id, winner_id, round_num,tie_ind) values(%s, %s, %s, %s, %s, %s)"
-        data = (tournament, player2, player1, loser, round_num, tie_ind)
-        cursor.execute(query, data)
+        data = (tournament, player2, player1, round_num, tie_ind)
+        cursor.execute(tournament_dbsql_ec.reportMatchInsertSQL(), data)
          
     connection.commit()
     connection.close
@@ -181,11 +161,7 @@ def swissPairings(tournament, round_num):
     """
     connection = connect()
     cursor = connection.cursor()
-    
-    query = "SELECT unique_player_id, player_name FROM player_table where tournament = %s order by matches, wins desc, last_result desc;"
-    data = (tournament)
-    
-    cursor.execute(query, (tournament,))
+    cursor.execute(tournament_dbsql_ec.playerOrderSQL(), (tournament,))
 
     count = 0
     row_count = 0
@@ -194,17 +170,16 @@ def swissPairings(tournament, round_num):
 
     matchq_connection = connect()
     match_connection = connect()
-    
-    for row in cursor:
 
+    for row in cursor:
         count += 1
-        row_count +=1
+        row_count += 1
 
         if count < 2:
-        ## Hold the first of each pair for later matching
+            # Hold the first of each pair for later matching
             player1 = row
         else:
-            ## Make sure the smaller value is in first position
+            # Make sure the smaller value is in first position
             if player1[0] < row[0]:
                 player1_id_h = player1
                 player2_id_h = row
@@ -212,37 +187,34 @@ def swissPairings(tournament, round_num):
                 player2_id_h = player1
                 player1_id_h = row
                 
-    ## check for duplicates - Extra Credit 1 - I also put constraints on the database.
+    # check for duplicates - Extra Credit 1 - I also put
+    # constraints on the database.
+
             matchq_cursor = connection.cursor()
-            query = "SELECT * FROM matches_table WHERE tournament = %s and player1_id = %s and player2_id = %s"
             data = (tournament, player1_id_h[0], player2_id_h[0])
-            matchq_cursor.execute(query, data)
+            matchq_cursor.execute(tournament_dbsql_ec.checkMatchExistsSQL(), data)
             matchq_connection.commit()
-  
-    ## if no match found, pair the players
+            count = 0;
+    # if no match found, pair the players
             if matchq_cursor.rowcount == 0:
                 pairing = player1_id_h + player2_id_h
                 pairing_list.append(pairing)
                 pairing = ()
  
-    ## Insert the matched players into the match table
-
-                match_cursor = match_connection.cursor()
-                query = "INSERT INTO matches_table (tournament,player1_id, player2_id, round_num) values(%s, %s, %s, %s)"
-                data = (tournament, player1_id_h[0], player2_id_h[0], round_num)
-                match_cursor.execute(query, data)
-                match_connection.commit()
-                count = 0            
+    # Insert the matched players into the match table
 
     matchq_connection.close
-    match_connection.close
     connection.close
 
-    ## append last player with a dummy negative record so they get credit for a win, but do not appear in a match
-    if (round_num == 0 and cursor.rowcount % 2 > 0 and row_count == cursor.rowcount):
+    """
+    Append last player with a dummy negative record so they get credit for a win,
+    but do not appear in a match. 
+    """
+
+    if (round_num == 0 and cursor.rowcount % 2 > 0 and
+            row_count == cursor.rowcount):
         pairing = player1 + (-1, ' ')
         pairing_list.append(pairing)
+        # print pairing_list
 
-    return pairing_list;    
-
-
+    return pairing_list
