@@ -120,8 +120,7 @@ def reportMatch(tournament, winner, loser, round_num, tie_ind):
         player2 = loser
         player1 = winner
 
-    # Update the matches table with 
-    print "report match ", winner, loser, round_num, tie_ind
+    # Insert record for matches table
     connection = connect()
     cursor = connection.cursor()
     data = (tournament, player1, player2, round_num, tie_ind)
@@ -208,7 +207,7 @@ def swissPairings(tournament, round_num):
 
     """
     Append last player with a dummy negative record so they get credit for a win,
-    but do not appear in a match. 
+    but do not appear in a match. I removed the table contraint to allow for -1
     """
 
     if (round_num == 0 and cursor.rowcount % 2 > 0 and
