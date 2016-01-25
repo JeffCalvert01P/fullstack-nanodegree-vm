@@ -44,7 +44,6 @@ def runSwissSystem():
         tie_ind = "Y"
 
     ## Loop through the pairing Tuples
-        print "round num ", i
         for row in pairings:
             reportMatch(tournament, row[0], row[2], i, tie_ind)
             tie_ind = "N"
