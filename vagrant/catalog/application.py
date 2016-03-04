@@ -44,6 +44,9 @@ def usersJSON():
 
 @app.route('/')
 def catalog_landing():
+    """
+      Display all catalog items and set the session state
+    """
 
     state = ''.join(random.choice(string.ascii_uppercase + string.digits)
                         for x in xrange(32))
@@ -54,11 +57,13 @@ def catalog_landing():
     items = session.query(Category, CatalogItem).filter(Category.id == CatalogItem.category_id).all()
         
     item_size = len(items)
-    print "catalog landing", state
     return render_template('catalogpublic.html', category_items = category_items, items = items, item_size = item_size, STATE = state)
 
 @app.route('/catalog')
 def catalog():
+    """
+     Display all catalog items 
+    """
 
     category_items = session.query(Category).all()
     items = session.query(Category, CatalogItem).filter(Category.id == CatalogItem.category_id).all()
@@ -70,6 +75,9 @@ def catalog():
 
 @app.route('/<string:category_name>')
 def displayCategoryItemList(category_name):
+    """
+     Display the catalog items for the selected category
+    """
 
     if 'username' not in login_session:
         user_name = ""
@@ -80,34 +88,58 @@ def displayCategoryItemList(category_name):
     category_selected = session.query(Category).filter_by(name = category_name).first()
     
     category_id = category_selected.id
-    items = session.query(Category, CatalogItem).filter(Category.id == CatalogItem.category_id).filter(CatalogItem.category_id == category_id).all()
+    items = session.query(Category, CatalogItem).filter(Category.id ==
+            CatalogItem.category_id).filter(CatalogItem.category_id == category_id).all()
     
     item_size = session.query(CatalogItem).filter_by(category_id = category_id).count()
 
-    return render_template('catalogcategory.html', category_items = category_items, items = items, item_size = item_size,category_name = category_selected.name, user_name = user_name)
+    return render_template('catalogcategory.html', category_items = category_items, items = items,
+                        item_size = item_size,category_name = category_selected.name, user_name = user_name)
 
 @app.route('/<string:category_name>/<string:item_name>')
 def displayCatalogItemDetail(category_name, item_name):
-
-    print "Def DisplayCategoryItenDetail"
-    if 'username' not in login_session:
-        user_name = ""
-    else:
-        user_name = login_session['username']
+    """
+     Display the catalog item detail
+    """
 
     item = session.query(CatalogItem).filter_by(name = item_name).first()
-    return render_template('catalogItem.html', item = item, category_name = category_name, user_name = user_name )
+
+    # allow records to be edited if the user is logged in and originally created the record
+    if 'username' not in login_session:
+        user_name = ""
+        user_edit_access = "false"
+    else:
+        user_name = login_session['username']
+        if login_session['appuserid'] == item.user_id:
+            user_edit_access = "true"
+        else:
+            user_edit_access = "false"
+
+    return render_template('catalogItem.html', item = item, category_name = category_name, user_edit_access = user_edit_access )
 
 @app.route('/<string:category_name>/<string:item_name>/edit/', methods=['GET','POST'])
 def editCatalogItem(category_name, item_name):
+    """
+     Edit the catalog item
+    """
 
-    if 'username' not in login_session:
-         return redirect('/')
-
+    # get the item to display
     item_id = request.args.get("item_id")
     item = session.query(CatalogItem).filter_by(id = item_id).one()
 
+    # Check to see if user is logged in and orignally added the record
+    if 'username' not in login_session:
+         return redirect('/')
+    else:
+        if login_session['appuserid'] != item.user_id:
+            return redirect('/')
+
+    if login_session['appuserid'] != item.user_id:
+        flash("User does not hae access to edit item")
+        return redirect('/')
+
     if request.method == 'POST':
+        # Update the item in the database
     	item.name = request.form['name']
     	item.description = request.form['description']
     	item.price = request.form['price']
@@ -115,26 +147,40 @@ def editCatalogItem(category_name, item_name):
     	id = item_id
 	session.add(item)
 	session.commit()
-        flash("Catalog Item has been updated")
+        flash("Catalog Item has been updated - %s" % item_name)
 	return redirect(url_for('catalog'))
     else:
         current_category = session.query(Category).filter_by(id = item.category_id).one()
         category_items = session.query(Category).all()
-	return render_template('editcatalogitem.html', item = item, category_items = category_items, current_category = current_category)
+	return render_template('editcatalogitem.html', item = item,
+                category_items = category_items, current_category = current_category)
 
 @app.route('/<string:category_name>/<string:item_name>/delete/', methods=['GET','POST'])
 def deleteCatalogItem(category_name, item_name):
+    """
+      Delete the catalog item
+    """
 
-    if 'username' not in login_session:
-         return redirect('/')
-
+    # get the item to display
     item_id = request.args.get("item_id")
     item = session.query(CatalogItem).filter_by(id = item_id).one()
 
+    # Check to see if user is logged in and orignally added the record
+    if 'username' not in login_session:
+         return redirect('/')
+    else:
+        if login_session['appuserid'] != item.user_id:
+            return redirect('/')
+
+    if login_session['appuserid'] != item.user_id:
+        flash("User does not hae access to delete item")
+        return redirect('/')
+
     if request.method == 'POST':
+        #delete the item from the database
         session.delete(item)
         session.commit()
-        flash("Catalog Item has been deleted")
+        flash("Catalog Item has been deleted - %s" % item_name)
         return redirect(url_for('catalog'))
     else:
         category_items = session.query(Category).filter_by(id = item.category_id).one()
@@ -143,35 +189,43 @@ def deleteCatalogItem(category_name, item_name):
 
 @app.route('/new/', methods=['GET','POST'])
 def addCatalogItem():
+    """
+      Add catalog items 
+    """
 
+    # Check to see if user is logged in
     if 'username' not in login_session:
          return redirect('/')
 
     if request.method == 'POST':
+        # check to see item exists.  If it exists, return a message.  If not, add the record
         item_size = session.query(CatalogItem).filter_by(name = request.form['name']).count()
-        print "this is the item size: ", item_size
         if item_size == 0:
-            newItem = CatalogItem(name = request.form['name'], description = request.form['description'], price = request.form['price'],
-                            category_id = request.form['category_id'], user_id = login_session.get('appuserid'))
+            newItem = CatalogItem(name = request.form['name'],
+                    description = request.form['description'], price = request.form['price'],
+                    category_id = request.form['category_id'], user_id = login_session.get('appuserid'))
             session.add(newItem)
             session.commit()
-            flash("New Catalog Item has been added")
+            flash("New Catalog Item has been added - %s" % request.form['name'])
             return redirect(url_for('catalog'))
         else:
-            print "this is the desc: ", request.form['description']
             flash("Catalog item already exists")
             category_items = session.query(Category).all()
-            return render_template('newcatalogitem.html', category_items = category_items, name = request.form['name'], description = request.form['description'],
-                            price = request.form['price'], category_id = request.form['category_id'], user_id = login_session.get('appuserid'))
+            return render_template('newcatalogitem.html', category_items = category_items,
+                            name = request.form['name'], description = request.form['description'],
+                            price = request.form['price'], category_id = request.form['category_id'],
+                            user_id = login_session.get('appuserid'))
     else:
         category_items = session.query(Category).all()
 	return render_template('newcatalogitem.html', category_items = category_items)
 
 @app.route('/gconnect', methods=['POST'])
 def gconnect():
+    """
+      Login using Google account
+    """
 
     # Validate state token
-    print "login session: ", login_session
     if request.args.get('state') != login_session['state']:
         response = make_response(json.dumps('Invalid state parameter.'), 401)
         response.headers['Content-Type'] = 'application/json'
@@ -179,8 +233,6 @@ def gconnect():
 
     # Obtain authorization code
     code = request.data
-
-    print "code: ", code
 
     try:
         # Upgrade the authorization code into a credentials object
@@ -195,7 +247,6 @@ def gconnect():
 
     # Check that the access token is valid.
     access_token = credentials.access_token
-    print "gconnect access token: ", access_token
     login_session['access_token'] = access_token
     url = ('https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=%s'
            % access_token)
@@ -216,7 +267,6 @@ def gconnect():
 
     print "Verify that the access token is valid for this app."
     if result['issued_to'] != CLIENT_ID:
-        print "f"
         response = make_response(
             json.dumps("Token's client ID does not match app's."), 401)
         response.headers['Content-Type'] = 'application/json'
@@ -232,8 +282,6 @@ def gconnect():
         response.headers['Content-Type'] = 'application/json'
         return response
 
-    print "here1"
-    
     login_session['credentials'] = credentials
     login_session['gplus_id'] = gplus_id
 
@@ -257,32 +305,30 @@ def gconnect():
     	newUser = Users(name = data['name'], email_addr = email)
 	session.add(newUser)
 	session.commit()
-    print "here2"
+
     user_id = session.query(Users).filter_by(email_addr = email).one().id
     login_session['appuserid'] = user_id
     
-    print "gconnect: ", login_session
-
     output = ''
-    output += '<h1>Welcome, '
+    output += '<h2>Welcome, '
     output += login_session['username']
-    output += '!</h1>'
+    output += '!</h2>'
     output += '<img src="'
     output += login_session['picture']
     output += ' " style = "width: 50px; height: 50px;border-radius: 150px;-webkit-border-radius: 150px;-moz-border-radius: 25px;"> '
     flash("you are now logged in as %s" % login_session['username'])
-    print "done! ", output
 
     return output
 
 @app.route('/gdisconnect')
 def gdisconnect():
-    print "gdisconnect: ", login_session
+    """
+      Logout of Google account
+    """
+
     credentials = login_session['credentials']
     access_token = login_session['access_token']
-    print 'In gdisconnect access token is %s', access_token
     if access_token is None:
- 	print 'Access Token is None'
  	response = make_response(json.dumps('Current user not connected.'), 401)
         response.headers['Content-Type'] = 'application/json'
         return response
@@ -290,8 +336,6 @@ def gdisconnect():
     url = 'https://accounts.google.com/o/oauth2/revoke?token=%s' % login_session['access_token']
     h = httplib2.Http()
     result = h.request(url, 'GET')[0]
-    print 'result is '
-    print result
     if result['status'] == '200':
 	del login_session['access_token'] 
 	del login_session['credentials'] 
@@ -310,6 +354,9 @@ def gdisconnect():
     	return response
 
 if __name__ == '__main__':
+    """
+      Set secret key
+    """
     app.secret_key = 'VD5uVBSoIIduSPa8RqNv2e4Z'
     app.debug = True
     app.run(host='0.0.0.0', port=8000)

@@ -31,7 +31,16 @@ Catalog
 </ul>
 {% endif %}
 {% endwith %}	
-
+<div id = "EditDiv" 
+{% if user_name == "" %}
+style="visibility:hidden"
+{% endif %}>
+<table valign="top">
+	<td>
+		<a href ='{{ url_for('addCatalogItem')}}'><button type="button"> Add Item</button></a> 
+	</td>
+</table>
+</div>
 <table valign="top">
 <tr>
 	<td valign="top">
@@ -54,7 +63,7 @@ Catalog
 		<table  style="border-left:1pt solid black; span">
 			<tr>
 					<h2>
-					Latest Items ({{item_size}} items)&nbsp&nbsp <a href ='{{ url_for('addCatalogItem')}}'><button type="button"> Add Item </button></a> 
+					Latest Items ({{item_size}} items)
 					</h2>
 			</tr>
 
