@@ -1,0 +1,52 @@
+<html>
+<head>
+<link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
+<link rel="icon" href="/static/favicon.ico" />
+<link rel="bookmark" href="/static/favicon.ico" />
+<link rel="shortcut icon" href="/static/favicon.ico" />
+</head>
+<body>
+<h1> New Catalog Item </h1>
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+<ul>
+{% for message in messages %}
+<li><strong>{{message}}</strong></li>
+{% endfor %}
+</ul>
+{% endif %}
+{% endwith %}	
+
+<form id="addItem" action="{{url_for('addCatalogItem')}}" method = 'POST'>
+
+<p>Name:</p>
+
+<input type='text' size='30' name='name' value='{{name}}' required='true'>
+
+<p>Description:</p>
+<textarea rows='4' cols='50' maxlength='250' name='description' form='addItem' required='true'>{{description}}</textarea>
+
+<p>Price:</p>
+<input type='text' size='8' name='price'  required='true' value='{{price}}'>
+
+<p>Category:</p>
+<select name='category_id'>
+	{% for i in category_items %} 
+		<option value='{{i.id}}'>{{i.name}}</option>
+	{% endfor %}
+</select>
+
+</br>
+</br>
+<td>
+<input type='submit', value = 'Add'>
+</td>
+<td>
+<a class="buttonLink" href = '{{url_for('catalog')}}'><button type="button"> Cancel </button></a> 
+</td>
+
+</form>
+
+</body>
+</body>
+</html>

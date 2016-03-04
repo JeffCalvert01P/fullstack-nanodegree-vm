@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
+<link rel="icon" href="/static/favicon.ico" />
+<link rel="bookmark" href="/static/favicon.ico" />
+<link rel="shortcut icon" href="/static/favicon.ico" />
+</head>
+
+<body>
+
+<table align="right" width=100%>
+<td>
+<h1>
+Catalog
+</h1>
+</td>
+<td>
+<h2>
+<a href='{{ url_for('gdisconnect') }}'><button type="button"> Logout </button></a>
+</h2>
+</td>
+</table>
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+<ul>
+{% for message in messages %}
+<li><strong>{{message}}</strong></li>
+{% endfor %}
+</ul>
+{% endif %}
+{% endwith %}	
+
+<table valign="top">
+<tr>
+	<td valign="top">
+		<table  valign="top">
+			<tr>
+				<h2>
+					Categories 
+				</h2>
+			</tr>
+			{% for i in category_items %} 
+			<tr>
+			<td span>
+				<a href='{{ url_for('displayCategoryItemList', category_name = i.name)}}'>{{i.name}}</a> 
+			</td>
+			</tr>
+			{% endfor %}
+		</table>
+	</td>
+	<td valign="top">
+		<table  style="border-left:1pt solid black; span">
+			<tr>
+					<h2>
+					Latest Items ({{item_size}} items)&nbsp&nbsp <a href ='{{ url_for('addCatalogItem')}}'><button type="button"> Add Item </button></a> 
+					</h2>
+			</tr>
+
+			{% for i, j in items %}
+			<tr>
+				<td>
+				<a href ='{{ url_for('displayCatalogItemDetail', category_name = i.name, item_name = j.name)}}'>{{j.name}} ({{i.name}})</a> 
+				</td>
+			</tr>
+			{% endfor %}
+		</table>
+	</td>
+</tr>
+</table>
+</body>
+
+</html>

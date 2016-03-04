@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
+<link rel="icon" href="/static/favicon.ico" />
+<link rel="bookmark" href="/static/favicon.ico" />
+<link rel="shortcut icon" href="/static/favicon.ico" />
+</head>
+
+<body>
+
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+<ul>
+{% for message in messages %}
+<li><strong>{{message}}</strong></li>
+{% endfor %}
+</ul>
+{% endif %}
+{% endwith %}	
+
+<table align="right" width="100%">
+	<td>
+		<h1>
+			Catalogs
+		</h1>
+	</td>
+	<td>
+		<div id = "logoutDiv" 
+			{% if user_name == "" %}
+				style="visibility:hidden"
+			{% endif %}>
+				<table>
+					<td>
+						<a href='{{ url_for('gdisconnect') }}'><button type="button"> Logout </button></a>
+					</td>
+				</table>
+		</div>
+	</td>
+</table>
+<div id = "EditDiv" 
+{% if user_name == "" %}
+style="visibility:hidden"
+{% endif %}>
+<table valign="top">
+	<td>
+		<a href ='{{ url_for('addCatalogItem')}}'><button type="button"> Add Item now </button></a> 
+	</td>
+</table>
+</div>
+<table valign="top">
+<tr>
+	<td valign="top">
+		<table valign="top">
+			<tr>
+				<h2>
+					Categories 
+				</h2>
+			</tr>
+			{% for i in category_items %} 
+			<tr>
+			<td span>
+				<a href='{{ url_for('displayCategoryItemList', category_name = i.name)}}'>{{i.name}}</a> 
+			</td>
+			</tr>
+			{% endfor %}
+		</table>
+	</td>
+	<td valign="top" >
+		<table valign="top" style="border-left:1pt solid black; span">
+			<tr>
+				<h2>
+				&nbsp&nbsp&nbsp{{ category_name }}
+				</h2>
+		
+			</tr>
+
+			{% for i, j in items %}
+			<tr>
+				<td>
+				<a href ='{{ url_for('displayCatalogItemDetail', category_name = i.name, item_name = j.name)}}'>{{j.name}} ({{i.name}})</a> 
+				</td>
+			</tr>
+			{% endfor %}
+		</table>
+	</td>
+</tr>
+</table>
+</body>
+
+</html>

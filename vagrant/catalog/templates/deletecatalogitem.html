@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
+<link rel="icon" href="/static/favicon.ico" />
+<link rel="bookmark" href="/static/favicon.ico" />
+<link rel="shortcut icon" href="/static/favicon.ico" />
+</head>
+<body>
+
+<h1>Delete Catalog Item </h1>
+<br>
+<h2> Are you sure you want to delete {{item.name}}? </h2>
+
+<form action="{{ url_for('deleteCatalogItem', category_name = category_items.name, item_name=item.name, item_id = item.id)}}" method = 'POST'>
+<br>
+<br>
+<td>
+<input type='submit', value = 'Delete'>&nbsp&nbsp<a class="buttonLink" href = '{{url_for('catalog')}}'><button type="button"> Cancel </button></a> 
+</td>
+
+
+</form>
+</body>
+
+</html>

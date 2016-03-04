@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
+<link rel="icon" href="/static/favicon.ico" />
+<link rel="bookmark" href="/static/favicon.ico" />
+<link rel="shortcut icon" href="/static/favicon.ico" />
+</head>
+<body>
+<h1>
+Catalog
+</h1>
+
+
+<table>
+	<tr>
+		<td>Category:</td>
+		<td>{{category_name}}</td>
+	</tr>
+	<tr>
+		<td>Item:</td>
+		<td>{{item.name}}<td>
+	</tr>
+	<tr>
+		<td>Description:</td>
+		<td><textarea rows='6' cols='50' maxlength='250' name='description' form='addItem' disabled='true'>{{item.description}}</textarea></td>
+	</tr>
+	<tr>
+		<td>Price:</td>
+		<td>{{item.price}}</td>
+	</tr>
+</table>
+
+<div id = "updateDiv" 
+{% if user_name == "" %}
+style="visibility:hidden"
+{% endif %}
+>
+<table>
+	<tr>
+		<td>
+			<a href ='{{ url_for('editCatalogItem', category_name= category_name, item_name = item.name,item_id=item.id)}}'><button type="button"> Edit </button></a> 
+		</td>
+		<td>
+			<a href ='{{ url_for('deleteCatalogItem', category_name= category_name, item_name = item.name,item_id=item.id)}}'><button type="button"> Delete </button></a> 
+		</td>
+		<td>
+		<a href = '{{url_for('catalog')}}'><button type="button"> Cancel </button></a>
+		</td>
+	</tr>
+</table>
+</div>
+<div id = "browseDiv" 
+{% if user_name != "" %}
+style="visibility:hidden"
+{% endif %}
+>
+<table>
+	<tr>
+		<td>
+		<a href = '{{url_for('catalog')}}'><button type="button"> Cancel </button></a>
+		</td>
+	</tr>
+</table>
+</body>
+</div>
+</html>

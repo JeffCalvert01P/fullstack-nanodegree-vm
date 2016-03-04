@@ -1,0 +1,30 @@
+body            { font-family: sans-serif; background-color: #EEEEEE}
+h1				{ color: #7C3737; }
+h2, h3, h4  	{ color: #000000; }
+h1, h2          { font-family: 'Georgia', serif; margin: 0; }
+h1              { border-bottom: 2px solid #000000; }
+h2              { font-size: 1.2em; }
+h3              { font-size: 1em; }
+
+p               { color: #000000;}
+table, th, td 	{ border-left: 2px; color: #333333; padding: 5px; valign: top}
+
+a {text-decoration: none; color:#000000; font-size: 1em;}
+
+.header         {left:50%; text-align: center;}
+.name {width:50%;display: inline-block; float: left;}
+.description {}
+.price {text-align: right; width:50%; float: right; }
+
+.flash	{ background: #cee5F5; }
+
+.button { font: bold 1.5em Arial;
+  text-decoration: none;
+  background-color: #EEEEEE;
+  color: #333333;
+  padding: 2px 6px 2px 6px;
+  border-top: 1px solid #CCCCCC;
+  border-right: 1px solid #333333;
+  border-bottom: 1px solid #333333;
+  border-left: 1px solid #CCCCCC; }
+  

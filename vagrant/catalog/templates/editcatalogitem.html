@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
+<link rel="icon" href="/static/favicon.ico" />
+<link rel="bookmark" href="/static/favicon.ico" />
+<link rel="shortcut icon" href="/static/favicon.ico" />
+
+</head>
+<body>
+
+<h1> Update Catalog Item </h1>
+
+<form action="{{url_for('editCatalogItem', category_name = current_category.name, item_name = item.name,item_id=item.id)}}" method = 'POST'>
+
+<p>Name:</p>
+<input type='text' size='30' name='name' placeholder='{{ item.name }}'>
+
+</br>
+<p>Description:</p>
+<textarea rows='4' cols='50' maxlength='250' name='description' placeholder='{{ item.description }}'></textarea>
+
+<p>Price:</p>
+<input type='text' size='8' name='price'  placeholder='{{ item.price }}'>
+
+<p>Category:</p>
+<select name='category_id' value='{{item.category_id}}'>
+	{% for i in category_items %} 
+		<option {% if i.id == item.category_id %} selected {% endif %} value='{{i.id}}' >{{i.name}}</option>
+		
+	{% endfor %}
+</select>
+
+</br>
+</br>
+
+<input type='submit' value='Update'> <a href='{{ url_for('catalog') }}'><button type="button"> Cancel </button></a>
+
+</form>
+
+</body>
+</body>
+</html>
