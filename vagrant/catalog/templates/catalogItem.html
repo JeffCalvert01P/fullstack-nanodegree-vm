@@ -22,12 +22,16 @@ Catalog
 		<td>{{item.name}}<td>
 	</tr>
 	<tr>
-		<td>Description:</td>
+		<td valign= "top">Description:</td>
 		<td><textarea rows='6' cols='50' maxlength='250' name='description' form='addItem' disabled='true'>{{item.description}}</textarea></td>
 	</tr>
 	<tr>
 		<td>Price:</td>
 		<td>{{item.price}}</td>
+	</tr>
+	<tr>
+		<td></td>
+		<td><img src='{{image}}'></td>
 	</tr>
 </table>
 
@@ -51,7 +55,7 @@ style="visibility:hidden"
 </table>
 </div>
 <div id = "browseDiv" 
-{% if user_name != "" %}
+{% if user_edit_access == "true" %}
 style="visibility:hidden"
 {% endif %}
 >

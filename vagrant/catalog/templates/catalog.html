@@ -6,22 +6,38 @@
 <link rel="icon" href="/static/favicon.ico" />
 <link rel="bookmark" href="/static/favicon.ico" />
 <link rel="shortcut icon" href="/static/favicon.ico" />
+
 </head>
 
 <body>
-
-<table align="right" width=100%>
-<td>
 <h1>
 Catalog
 </h1>
-</td>
-<td>
-<h2>
-<a href='{{ url_for('gdisconnect') }}'><button type="button"> Logout </button></a>
-</h2>
-</td>
-</table>
+<br>
+	<ul>
+		<div id = "EditDiv" 
+		{% if user_name == "" %}
+			style="visibility:hidden"
+		{% endif %}>
+				<li><a href ='{{ url_for('addCatalogItem')}}'>Add Item</a></li> 
+		</div>
+		<div id = "logoutDiv" 
+			{% if user_name == "" %}
+				style="visibility:hidden"
+			{% endif %}>
+				<li><a href='{{ url_for('gdisconnect') }}'>Logout</a></li>
+		</div>
+		<div id = "loginDiv" 
+			{% if user_name != "" %}
+				style="visibility:hidden"
+			{% endif %}>
+				<li><a href='{{ url_for('catalog_landing') }}'>Login Page</a></li>
+		</div>
+	</ul>
+
+<br>
+<br>
+
 {% with messages = get_flashed_messages() %}
 {% if messages %}
 <ul>
@@ -31,17 +47,9 @@ Catalog
 </ul>
 {% endif %}
 {% endwith %}	
-<div id = "EditDiv" 
-{% if user_name == "" %}
-style="visibility:hidden"
-{% endif %}>
-<table valign="top">
-	<td>
-		<a href ='{{ url_for('addCatalogItem')}}'><button type="button"> Add Item</button></a> 
-	</td>
-</table>
-</div>
-<table valign="top">
+<br>
+<br>
+<table valign="top" align="left">
 <tr>
 	<td valign="top">
 		<table  valign="top">
@@ -62,9 +70,9 @@ style="visibility:hidden"
 	<td valign="top">
 		<table  style="border-left:1pt solid black; span">
 			<tr>
-					<h2>
+				<h2>
 					Latest Items ({{item_size}} items)
-					</h2>
+				</h2>
 			</tr>
 
 			{% for i, j in items %}
@@ -78,6 +86,7 @@ style="visibility:hidden"
 	</td>
 </tr>
 </table>
+
 </body>
 
 </html>

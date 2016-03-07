@@ -40,6 +40,8 @@ class CatalogItem(Base):
     category = relationship(Category) 
     user_id = Column(Integer,ForeignKey('users.id'))
     user = relationship(Users)
+    filetype = Column(String(4))
+
 
     @property
     def serialize(self):

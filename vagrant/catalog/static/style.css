@@ -11,6 +11,36 @@ table, th, td 	{ border-left: 2px; color: #333333; padding: 5px; valign: top}
 
 a {text-decoration: none; color:#000000; font-size: 1em;}
 
+ul {
+	list-style-type: none;
+    margin: 0;
+    padding: 0;
+ 
+	}
+
+	
+li {
+    float: left;
+}
+
+li a {
+    display: inline;
+    color: black;
+    text-align: center;
+    padding: 14px 16px;
+    border-right: 1px solid #bbb;
+    text-decoration: none;
+}
+
+active {
+    background-color: #4CAF50;
+}
+
+/* Change the link color to #111 (black) on hover */
+li a:hover {
+    background-color: #818181;
+}
+
 .header         {left:50%; text-align: center;}
 .name {width:50%;display: inline-block; float: left;}
 .description {}
@@ -28,3 +58,4 @@ a {text-decoration: none; color:#000000; font-size: 1em;}
   border-bottom: 1px solid #333333;
   border-left: 1px solid #CCCCCC; }
   
+
