@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html>
 <head>
+<! Style sheet and favicon below >
 <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
 <link rel="icon" href="/static/favicon.ico" />
 <link rel="bookmark" href="/static/favicon.ico" />
 <link rel="shortcut icon" href="/static/favicon.ico" />
 </head>
-
+<! Check access flag passed from python to see if the user should be able to edit and delete records.  
+Hide buttons if they should not be able to access them >
 <body>
 <h1>
 Catalog

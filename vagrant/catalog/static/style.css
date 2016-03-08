@@ -41,11 +41,6 @@ li a:hover {
     background-color: #818181;
 }
 
-.header         {left:50%; text-align: center;}
-.name {width:50%;display: inline-block; float: left;}
-.description {}
-.price {text-align: right; width:50%; float: right; }
-
 .flash	{ background: #cee5F5; }
 
 .button { font: bold 1.5em Arial;

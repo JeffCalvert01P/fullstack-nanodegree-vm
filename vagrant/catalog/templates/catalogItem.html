@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+<! Style sheet and favicon below >
 <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
 <link rel="icon" href="/static/favicon.ico" />
 <link rel="bookmark" href="/static/favicon.ico" />
@@ -34,7 +35,7 @@ Catalog
 		<td><img src='{{image}}'></td>
 	</tr>
 </table>
-
+<! Check access flag passed from python to see if the user should be able to edit and delete records.  Hide buttons if they should not be able to access them >
 <div id = "updateDiv" 
 {% if user_edit_access == "false" %}
 style="visibility:hidden"
@@ -54,6 +55,7 @@ style="visibility:hidden"
 	</tr>
 </table>
 </div>
+<! Show/hide cancel down here also for cleaner presentation >
 <div id = "browseDiv" 
 {% if user_edit_access == "true" %}
 style="visibility:hidden"
